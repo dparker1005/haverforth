@@ -49,11 +49,9 @@ function process(stack, input, terminal) {
     } else if (input === ".s") {
         print(terminal, " <" + stack.length + "> " + stack.slice().join(" "));
     } else if (input === "+") {
-        var first = stack.pop();
-        var second = stack.pop();
-        stack.push(first+second);
+        add(stack, terminal);
     } else {
-        print(terminal, ":-( Unrecognized input");
+        throwError("Unrecognized input.", stack, terminal);
     }
     renderStack(stack);
 };
@@ -87,3 +85,37 @@ $(document).ready(function() {
     print(terminal, "As you type, the stack (on the right) will be kept in sync");
     runRepl(terminal, stack);
 });
+
+function throwError(message, stack, terminal){
+	print(terminal, message)
+	print(terminal, "Resetting stack.");
+	emptyStack(stack);
+	terminal.setTextColor('#FF0000');
+	setTimeout(function(){
+    	terminal.setTextColor('#FFFFFF');
+    	setTimeout(function(){
+    		terminal.setTextColor('#FF0000');
+    		setTimeout(function(){
+    			terminal.setTextColor('#FFFFFF');
+    			setTimeout(function(){
+    				terminal.setTextColor('#FF0000');
+    				setTimeout(function(){
+    					terminal.setTextColor('#FFFFFF');
+					}, 100);
+				}, 100);
+			}, 100);
+		}, 100);
+	}, 100);
+	
+}
+
+function add(stack, terminal){
+	console.log("adding");
+	if(stack.length < 2){
+		throwError("Not enough elements for add operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    var second = stack.pop();
+    stack.push(first+second);
+}
