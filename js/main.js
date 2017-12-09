@@ -1,6 +1,19 @@
 // See the following on using objects as key/value dictionaries
 // https://stackoverflow.com/questions/1208222/how-to-do-associative-array-hashing-in-javascript
-var words = {};
+var basic_words = {	".":pop, 
+					".s":printStack, 
+					"+":add, 
+					"-":subtract,
+					"*":multiply,
+					"/":divide,
+					"%":mod,
+					"drop":drop,
+					"nip":nip,
+					"dup":dup,
+					"swap":swap,
+					"over":over,
+					"tuck":tuck,
+					};
 
 /** 
  * Empty and update the stack
@@ -46,11 +59,9 @@ function process(stack, input, terminal) {
     if (!(isNaN(Number(input)))) {
         print(terminal,"pushing " + Number(input));
         stack.push(Number(input));
-    } else if (input === ".s") {
-        print(terminal, " <" + stack.length + "> " + stack.slice().join(" "));
-    } else if (input === "+") {
-        add(stack, terminal);
-    } else {
+    } else if (basic_words.hasOwnProperty(input)) {
+        basic_words[input](stack, terminal);
+    }  else {
         throwError("Unrecognized input.", stack, terminal);
     }
     renderStack(stack);
@@ -86,6 +97,12 @@ $(document).ready(function() {
     runRepl(terminal, stack);
 });
 
+/** 
+ * Throws an error message, blinks text red and resets stack
+ * @param {string} message - The error message to throw
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object
+ */
 function throwError(message, stack, terminal){
 	print(terminal, message)
 	print(terminal, "Resetting stack.");
@@ -109,8 +126,36 @@ function throwError(message, stack, terminal){
 	
 }
 
+
+/** 
+ * Prints the whole stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function printStack(stack, terminal){
+	print(terminal, " <" + stack.length + "> " + stack.slice().join(" "));
+}
+
+/** 
+ * Pops and prints top element of stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function pop(stack, terminal){
+	if(stack.length < 1){
+		throwError("Not enough elements for pop operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    print(terminal, first);
+}
+
+/** 
+ * Adds the top two elements of the stack together
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
 function add(stack, terminal){
-	console.log("adding");
 	if(stack.length < 2){
 		throwError("Not enough elements for add operation.", stack, terminal);
 		return;
@@ -118,4 +163,157 @@ function add(stack, terminal){
 	var first = stack.pop();
     var second = stack.pop();
     stack.push(first+second);
+}
+
+/** 
+ * Subtracts the top two elements of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function subtract(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for subtract operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    var second = stack.pop();
+    stack.push(second-first);
+}
+
+/** 
+ * Multiplies the top two elements of the stack together
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function multiply(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for multiply operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    var second = stack.pop();
+    stack.push(second*first);
+}
+
+/** 
+ * Divides the top two elements of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function divide(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for divide operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    var second = stack.pop();
+    stack.push(second/first);
+}
+
+/** 
+ * Gets the remainder of the top two elements of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function mod(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for mod operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    var second = stack.pop();
+    stack.push(second%first);
+}
+
+/** 
+ * Drops the top element of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function drop(stack, terminal){
+	if(stack.length < 1){
+		throwError("Not enough elements for drop operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+}
+
+/** 
+ * Drops the second element of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function nip(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for nip operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+	var second = stack.pop();
+    stack.push(first);
+}
+
+/** 
+ * Swaps the top two elements of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function swap(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for swap operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+	var second = stack.pop();
+    stack.push(first);
+    stack.push(second);
+}
+
+/** 
+ * Duplicates the top element of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function dup(stack, terminal){
+	if(stack.length < 1){
+		throwError("Not enough elements for dup operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    stack.push(first);
+    stack.push(first);
+}
+
+/** 
+ * Copies the top element over the second element
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function over(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for over operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+	var second = stack.pop();
+    stack.push(second);
+    stack.push(first);
+    stack.push(second);
+}
+
+/** 
+ * Copies the second element to the top of the stack
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function tuck(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for tuck operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+	var second = stack.pop();
+    stack.push(first);
+    stack.push(second);
+    stack.push(first);
 }
