@@ -3,11 +3,13 @@
 var words = {};
 
 /** 
- * Your thoughtful comment here.
+ * Empty and update the stack
+ * @param {Array[number]} stack - The stack to empty
  */
 function emptyStack(stack) {
-    // ...
-}
+    stack.length = 0;
+    renderStack(stack);
+};
 
 /**
  * Print a string out to the terminal, and update its scroll to the
@@ -76,9 +78,12 @@ $(document).ready(function() {
     $("#terminal").append(terminal.html);
 
     var stack = [];
+    
+    var resetButton = $("#reset"); // resetButton now references 
+                                   // the HTML button with ID "reset"
+    resetButton.click(function() {emptyStack(stack);})
 
     print(terminal, "Welcome to HaverForth! v0.1");
     print(terminal, "As you type, the stack (on the right) will be kept in sync");
-
     runRepl(terminal, stack);
 });
