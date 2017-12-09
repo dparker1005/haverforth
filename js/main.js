@@ -55,16 +55,19 @@ function renderStack(stack) {
  * @param {Terminal} terminal - The terminal object
  */
 function process(stack, input, terminal) {
-    // The user typed a number
-    if (!(isNaN(Number(input)))) {
-        print(terminal,"pushing " + Number(input));
-        stack.push(Number(input));
-    } else if (basic_words.hasOwnProperty(input)) {
-        basic_words[input](stack, terminal);
-    }  else {
-        throwError("Unrecognized input.", stack, terminal);
-    }
-    renderStack(stack);
+	var arr_input = input.trim().split(/ +/);
+	arr_input.forEach(function(i){
+		// The user typed a number
+		if (!(isNaN(Number(i)))) {
+			print(terminal,"pushing " + Number(i));
+			stack.push(Number(i));
+		} else if (basic_words.hasOwnProperty(i)) {
+			basic_words[i](stack, terminal);
+		}  else {
+			throwError("Unrecognized input.", stack, terminal);
+		}
+		renderStack(stack);
+    });
 };
 
 function runRepl(terminal, stack) {
