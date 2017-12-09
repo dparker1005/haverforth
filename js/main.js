@@ -14,6 +14,7 @@ var basic_words = {	".":pop,
 					"over":over,
 					"tuck":tuck,
 					};
+var user_words = {}
 
 /** 
  * Empty and update the stack
@@ -54,15 +55,50 @@ function renderStack(stack) {
  * @param {string} input - The string the user typed
  * @param {Terminal} terminal - The terminal object
  */
+var process_creating_user_word = false;
+var process_user_word_name = "";
+var process_user_word_contents = "";
 function process(stack, input, terminal) {
 	var arr_input = input.trim().split(/ +/);
 	arr_input.forEach(function(i){
-		// The user typed a number
-		if (!(isNaN(Number(i)))) {
+		if (process_creating_user_word) {
+		// user building new word
+			if (process_user_word_name === ""){
+				// user naming new word
+				var legal_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+				if (legal_chars.indexOf(i.charAt(0)) > -1 || !basic_words.hasOwnProperty(i)) {
+					// legal name
+					process_user_word_name = i;
+				}
+				else {
+					// illegal name
+					throwError("Invalid word name.", stack, terminal);
+					process_creating_user_word = false;
+				}
+			} else if (i == ";"){
+				// user ending new word
+				user_words[process_user_word_name] = process_user_word_contents;
+				process_creating_user_word = false;
+			} else if (i === ":"){
+				// user attempting to declare new word within word
+				throwError("Cannot define function within function.", stack, terminal);
+				process_creating_user_word = false;
+			} else {
+				// user adding inputs to word
+				process_user_word_contents += " " + i;
+			}
+		} else if (!(isNaN(Number(i)))) {
 			print(terminal,"pushing " + Number(i));
 			stack.push(Number(i));
+		} else if (i === ":") {
+			process_creating_user_word = true;
+			process_user_word_name = "";
+			process_user_word_contents = [];
 		} else if (basic_words.hasOwnProperty(i)) {
 			basic_words[i](stack, terminal);
+		}
+		else if (user_words.hasOwnProperty(i)) {
+			process(stack, user_words[i], terminal);
 		}  else {
 			throwError("Unrecognized input.", stack, terminal);
 		}
