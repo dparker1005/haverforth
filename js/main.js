@@ -6,6 +6,8 @@ var basic_words = {	".":pop,
 					"-":subtract,
 					"*":multiply,
 					"/":divide,
+					"int/":int_divide,
+					"floor":floor,
 					"%":mod,
 					"drop":drop,
 					"nip":nip,
@@ -247,6 +249,30 @@ function divide(stack, terminal){
 	var first = stack.pop();
     var second = stack.pop();
     stack.push(second/first);
+}
+
+function int_divide(stack, terminal){
+	if(stack.length < 2){
+		throwError("Not enough elements for divide operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    var second = stack.pop();
+    stack.push(Math.floor(second/first));
+}
+
+/** 
+ * Rounds down the top element of the stack to an integer
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function floor(stack, terminal){
+	if(stack.length < 1){
+		throwError("Not enough elements for floor operation.", stack, terminal);
+		return;
+	}
+	var first = stack.pop();
+    stack.push(Math.floor(first));
 }
 
 /** 

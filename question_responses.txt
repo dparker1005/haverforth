@@ -1,0 +1,32 @@
+Describe what's happening in the screenshot and write up something you found useful about the JavaScript debugger.
+
+In the screenshot, the user is declaring a function to square an integer ( : square dup * ; ). The breakpoint was hit while processing the '*'. I thought it was really useful how you could hover over a variable in the code and it would show you what the variable currently is. This was a very intuitive implementation of debugging.
+
+-------------------------------------------------------
+
+What new perspective did you gain by redoing the lab in JavaScript?
+
+It was really nice to be able to work with GUI elements, and made visualizing the stack much easier. It was surprisingly easy to implement and makes the program feel more complete/useful as an end product. It really makes a good distinction between code that works and code that is user-friendly.
+
+-------------------------------------------------------
+
+Can you point to one instance where the lack of types in JavaScript was damaging to your productivity?
+
+The lack of types didn't really trip me up too much, but I can see situations during the input matching that could have been affected by mismatched types. Using '===' took care of that though.
+
+-------------------------------------------------------
+
+Did JavaScript's lack of types surprise you? Or hurt you in any way? Or was it easier than C++ because you didn't have to annotate the program with types? Either answer is fine here, as long as you provide some thoughtful reflection.
+
+The lack of types felt very similar to python, so I felt at home. I wouldn't say that not having to type variables was easier than C++ since theres nothing inherently hard about putting types to variables, but I would say that it felt more fluid to just say that something is a variable. I feel like in a complex program that I know debugging will be an issue, having specified types would be very useful, but in a simple script like this, it seems unnecessary, especially considering how useful the debugger in Chrome is. 
+
+-------------------------------------------------------
+
+Describe a few features of programming your previous lab that you used here.
+
+I used very similar features in both my JavaScript and C++ implementation. Instead of std::map in C++, I used associative arrays in JavaScript, but they worked very similarly. The largest difference was probably using a stack object in C++, but only using an array in JavaScript. Even though it was only an array, it was still used like the stack object though in the sense that it had push and pop functions, so the implementations ended up being very similar. The main difference was that the Stack in C++ had to be returned at the end of each function, while the array in JavaScript was changed everywhere when one instance was changed, hence it never needed to be returned.
+
+
+
+
+
