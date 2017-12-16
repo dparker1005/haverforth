@@ -15,8 +15,22 @@ var basic_words = {	".":pop,
 					"swap":swap,
 					"over":over,
 					"tuck":tuck,
+					"clear":clearStack,
+					"reset":resetStack
 					};
 var user_words = {}
+
+/** 
+ * Empty stack, reset terminal
+ * @param {Array[number]} stack - The stack to empty
+ * @param {Terminal} terminal - The `terminal` object to clear
+ */
+function resetStack(stack, terminal) {
+    terminal.clear();
+    emptyStack(stack);
+    print(terminal, "Welcome to HaverForth! v0.1");
+    print(terminal, "As you type, the stack (on the right) will be kept in sync");
+};
 
 /** 
  * Empty and update the stack
@@ -51,6 +65,53 @@ function renderStack(stack) {
 };
 
 /** 
+ * Sync up the HTML with the user-created words
+ * Using code by mmv1219 from 
+ * 		https://stackoverflow.com/questions/8936652/dynamically-create-buttons-with-jquery
+ * @param {Terminal} terminal   - The `terminal` object to write to
+ * @param {Array[Number]} stack - The stack that words will run on
+ */
+function renderUserWords(terminal, stack) {
+	var tbl = $("#user-defined-funcs");
+    tbl.empty();
+    for (var word in user_words) {
+    	var btn = document.createElement('button');
+        var txt = document.createTextNode(word);
+
+        btn.appendChild(txt);
+        btn.setAttribute('type', 'button');
+        btn.setAttribute('id', 'user_func_' + word);
+        //tbl.append('<tr><td><a class="btn btn-info" href="#" role="button" id="user_func_'+word+'">'+word+'</a></td><td>'+user_words[word]+'</td></tr>');
+        tbl.append('<tr><td><button class="btn btn-info" id="user_func_'+
+        			word+
+        			'">'+word+'</a></td><td>'+
+        			user_words[word]+
+        			'</td></tr>');
+        //tbl.append("<tr><td>");
+        //tbl.append(btn);
+        //tbl.append("</td></tr>");
+        userWordButtonHandler(word, terminal, stack);
+    }
+};
+
+
+/** 
+ * Adds functionality to user word buttons.
+ * Debugging help from https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/JavaScript
+ *		Which linked to https://github.com/mdn/learning-area/blob/master/tools-testing/cross-browser-testing/javascript/good-for-loop.html
+ * @param {string} word - The word for which a button is being created
+ * @param {Terminal} terminal   - The `terminal` object to write to
+ * @param {Array[Number]} stack - The stack that words will run on
+ */
+function userWordButtonHandler(word, terminal, stack) {
+    $("#user_func_"+word).click(function() {
+        console.log("running "+word);
+        print(terminal, "Running word \'"+word+"\' from button.");
+        process(stack, word, terminal);
+    });
+}
+
+/** 
  * Process a user input, update the stack accordingly, write a
  * response out to some terminal.
  * @param {Array[Number]} stack - The stack to work on
@@ -81,6 +142,7 @@ function process(stack, input, terminal) {
 				// user ending new word
 				user_words[process_user_word_name] = process_user_word_contents;
 				process_creating_user_word = false;
+				renderUserWords(terminal, stack);
 			} else if (i === ":"){
 				// user attempting to declare new word within word
 				throwError("Cannot define function within function.", stack, terminal);
@@ -131,7 +193,7 @@ $(document).ready(function() {
     
     var resetButton = $("#reset"); // resetButton now references 
                                    // the HTML button with ID "reset"
-    resetButton.click(function() {emptyStack(stack);})
+    resetButton.click(function() {resetStack(stack, terminal);})
 
     print(terminal, "Welcome to HaverForth! v0.1");
     print(terminal, "As you type, the stack (on the right) will be kept in sync");
@@ -381,4 +443,13 @@ function tuck(stack, terminal){
     stack.push(first);
     stack.push(second);
     stack.push(first);
+}
+
+/** 
+ * Clears the console
+ * @param {Array[Number]} stack - The stack to work on
+ * @param {Terminal} terminal - The terminal object in case of error
+ */
+function clearStack(stack, terminal){
+	terminal.clear();
 }
