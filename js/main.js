@@ -60,6 +60,49 @@ class Stack {
 	}
 }
 
+class ObservableStack extends Stack {
+	
+	constructor() {
+		super();
+		this._observers = [];
+	}
+	
+	//takes a function observer
+	registerObserver(observer) {
+		this._observers.push(observer);
+	}
+	
+	fire() {
+		var thisObj = this;
+		var scope = thisObj || window;
+        this._observers.forEach(function(item) {
+            item.call(scope, thisObj);
+        });
+	}
+	
+	empty() {
+		this._stack_length = 0;
+		
+		//clears stack_arr
+		this._stack_arr.length = 0;
+		this.fire();
+	}
+	
+	pop() {
+		this._stack_length--;
+		var toReturn = this._stack_arr.pop();
+		this.fire();
+		return toReturn;
+	}
+	
+	push(to_push) {
+		this._stack_length++;
+		this._stack_arr.push(to_push)
+		this.fire();
+	}
+	
+}
+
 /** 
  * Empty stack, reset terminal
  * @param {Stack} stack - The stack to empty
@@ -78,7 +121,7 @@ function resetStack(stack, terminal) {
  */
 function emptyStack(stack) {
     stack.empty();
-    renderStack(stack);
+    //renderStack(stack);
 };
 
 /**
@@ -93,16 +136,19 @@ function print(terminal, msg) {
     $("#terminal").scrollTop($('#terminal')[0].scrollHeight + 40);
 }
 
+
 /** 
  * Sync up the HTML with the stack in memory
  * @param {Stack} The stack to render
  */
+/*
 function renderStack(stack) {
     $("#thestack").empty();
     stack.stack_arr.slice().reverse().forEach(function(element) {
         $("#thestack").append("<tr><td>" + element + "</td></tr>");
     });
 };
+*/
 
 /** 
  * Sync up the HTML with the user-created words
@@ -121,17 +167,14 @@ function renderUserWords(terminal, stack) {
         btn.appendChild(txt);
         btn.setAttribute('type', 'button');
         btn.setAttribute('id', 'user_func_' + word);
-        //tbl.append('<tr><td><a class="btn btn-info" href="#" role="button" id="user_func_'+word+'">'+word+'</a></td><td>'+user_words[word]+'</td></tr>');
         tbl.append('<tr><td><button class="btn btn-info" id="user_func_'+
         			word+
         			'">'+word+'</a></td><td>'+
         			user_words[word]+
         			'</td></tr>');
-        //tbl.append("<tr><td>");
-        //tbl.append(btn);
-        //tbl.append("</td></tr>");
         userWordButtonHandler(word, terminal, stack);
     }
+    //tbl.append('<tr><td><button class="btn btn-info" id="new_user_func">Create New Word</td></tr>');
 };
 
 
@@ -206,7 +249,7 @@ function process(stack, input, terminal) {
 		}  else {
 			throwError("Unrecognized input.", stack, terminal);
 		}
-		renderStack(stack);
+		//renderStack(stack);
     });
 };
 
@@ -229,7 +272,18 @@ $(document).ready(function() {
     // represents the terminal to the end of it.
     $("#terminal").append(terminal.html);
 
-    var stack = new Stack();
+    var stack = new ObservableStack();
+    
+    var renderStack = function renderStack(stack) {
+    	console.log(stack);
+    	$("#thestack").empty();
+    	stack.stack_arr.slice().reverse().forEach(function(element) {
+        	$("#thestack").append("<tr><td>" + element + "</td></tr>");
+    	});
+	};
+    stack.registerObserver(renderStack);
+    
+    //renderUserWords(terminal, stack);
     
     var resetButton = $("#reset"); // resetButton now references 
                                    // the HTML button with ID "reset"
