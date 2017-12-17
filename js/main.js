@@ -171,10 +171,33 @@ function renderUserWords(terminal, stack) {
         			word+
         			'">'+word+'</a></td><td>'+
         			user_words[word]+
-        			'</td></tr>');
+        			'</td><td><button class="btn btn-default" id="user_func_'+
+        			word+
+        			'_edit">Edit</a></td><td><button class="btn btn-danger" id="user_func_'+
+        			word+
+        			'_delete">Delete</a></td></tr>');
         userWordButtonHandler(word, terminal, stack);
     }
-    //tbl.append('<tr><td><button class="btn btn-info" id="new_user_func">Create New Word</td></tr>');
+    tbl.append('<tr><td><button class="btn btn-info" id="new_user_func">Create New Word</td><td></td><td></td><td></td></tr>');
+    $("#new_user_func").click(function() {
+		var word_name = window.prompt("Enter word name: ","myWord");
+		if(word_name === null) {
+			return;
+		}
+		word_name = word_name.replace(/\s+/g, ''); //https://stackoverflow.com/questions/5963182/how-to-remove-spaces-from-a-string-using-javascript
+		var legal_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		if(legal_chars.indexOf(word_name.charAt(0)) < 0 | basic_words.hasOwnProperty(word_name)) {
+			window.alert("Invalid word name.");
+			return;
+		}
+		var word_def = window.prompt("Enter definition for "+word_name+":","ex. 2 + ...");
+		if(word_def === null) {
+			return;
+		}
+		user_words[word_name] = word_def;
+		renderUserWords(terminal, stack);
+		print(terminal, "Created word \'"+word_name+"\'.");
+    });
 };
 
 
@@ -188,9 +211,24 @@ function renderUserWords(terminal, stack) {
  */
 function userWordButtonHandler(word, terminal, stack) {
     $("#user_func_"+word).click(function() {
-        console.log("running "+word);
         print(terminal, "Running word \'"+word+"\' from button.");
         process(stack, word, terminal);
+    });
+    
+    $("#user_func_"+word+"_edit").click(function() {
+        var word_def = window.prompt("Enter definition for "+word+":",user_words[word]);
+		if(word_def === null) {
+			return;
+		}
+		user_words[word] = word_def;
+		renderUserWords(terminal, stack);
+		print(terminal, "Updated word \'"+word+"\'.");
+    });
+    
+    $("#user_func_"+word+"_delete").click(function() {
+        print(terminal, "Deleting word \'"+word+"\'.");
+        delete user_words[word];
+        renderUserWords(terminal, stack);
     });
 }
 
@@ -212,7 +250,7 @@ function process(stack, input, terminal) {
 			if (process_user_word_name === ""){
 				// user naming new word
 				var legal_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-				if (legal_chars.indexOf(i.charAt(0)) > -1 || !basic_words.hasOwnProperty(i)) {
+				if (!(legal_chars.indexOf(i.charAt(0)) < 0 | basic_words.hasOwnProperty(i))) {
 					// legal name
 					process_user_word_name = i;
 				}
@@ -275,7 +313,6 @@ $(document).ready(function() {
     var stack = new ObservableStack();
     
     var renderStack = function renderStack(stack) {
-    	console.log(stack);
     	$("#thestack").empty();
     	stack.stack_arr.slice().reverse().forEach(function(element) {
         	$("#thestack").append("<tr><td>" + element + "</td></tr>");
@@ -283,7 +320,7 @@ $(document).ready(function() {
 	};
     stack.registerObserver(renderStack);
     
-    //renderUserWords(terminal, stack);
+    renderUserWords(terminal, stack);
     
     var resetButton = $("#reset"); // resetButton now references 
                                    // the HTML button with ID "reset"
