@@ -20,9 +20,49 @@ var basic_words = {	".":pop,
 					};
 var user_words = {}
 
+
+/** 
+ * An object version of the stack
+ * Used following resources to create object:
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+ * Thomas's answer from https://stackoverflow.com/questions/37502163/getter-setter-maximum-call-stack-size-exceeded-error
+ */
+class Stack {
+
+	constructor() {	
+		this._stack_arr = [];
+		this._stack_length = 0;	
+	}
+	
+	get stack_arr() {
+		return this._stack_arr;
+	}
+	
+	get stack_length() {
+		return this._stack_length;
+	}
+
+	empty() {
+		this._stack_length = 0;
+		
+		//clears stack_arr
+		this._stack_arr.length = 0;
+	}
+	
+	pop() {
+		this._stack_length--;
+		return this._stack_arr.pop();
+	}
+	
+	push(to_push) {
+		this._stack_length++;
+		this._stack_arr.push(to_push)
+	}
+}
+
 /** 
  * Empty stack, reset terminal
- * @param {Array[number]} stack - The stack to empty
+ * @param {Stack} stack - The stack to empty
  * @param {Terminal} terminal - The `terminal` object to clear
  */
 function resetStack(stack, terminal) {
@@ -34,10 +74,10 @@ function resetStack(stack, terminal) {
 
 /** 
  * Empty and update the stack
- * @param {Array[number]} stack - The stack to empty
+ * @param {Stack} stack - The stack to empty
  */
 function emptyStack(stack) {
-    stack.length = 0;
+    stack.empty();
     renderStack(stack);
 };
 
@@ -55,11 +95,11 @@ function print(terminal, msg) {
 
 /** 
  * Sync up the HTML with the stack in memory
- * @param {Array[Number]} The stack to render
+ * @param {Stack} The stack to render
  */
 function renderStack(stack) {
     $("#thestack").empty();
-    stack.slice().reverse().forEach(function(element) {
+    stack.stack_arr.slice().reverse().forEach(function(element) {
         $("#thestack").append("<tr><td>" + element + "</td></tr>");
     });
 };
@@ -69,7 +109,7 @@ function renderStack(stack) {
  * Using code by mmv1219 from 
  * 		https://stackoverflow.com/questions/8936652/dynamically-create-buttons-with-jquery
  * @param {Terminal} terminal   - The `terminal` object to write to
- * @param {Array[Number]} stack - The stack that words will run on
+ * @param {Stack} stack - The stack that words will run on
  */
 function renderUserWords(terminal, stack) {
 	var tbl = $("#user-defined-funcs");
@@ -101,7 +141,7 @@ function renderUserWords(terminal, stack) {
  *		Which linked to https://github.com/mdn/learning-area/blob/master/tools-testing/cross-browser-testing/javascript/good-for-loop.html
  * @param {string} word - The word for which a button is being created
  * @param {Terminal} terminal   - The `terminal` object to write to
- * @param {Array[Number]} stack - The stack that words will run on
+ * @param {Stack} stack - The stack that words will run on
  */
 function userWordButtonHandler(word, terminal, stack) {
     $("#user_func_"+word).click(function() {
@@ -114,7 +154,7 @@ function userWordButtonHandler(word, terminal, stack) {
 /** 
  * Process a user input, update the stack accordingly, write a
  * response out to some terminal.
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {string} input - The string the user typed
  * @param {Terminal} terminal - The terminal object
  */
@@ -189,7 +229,7 @@ $(document).ready(function() {
     // represents the terminal to the end of it.
     $("#terminal").append(terminal.html);
 
-    var stack = [];
+    var stack = new Stack();
     
     var resetButton = $("#reset"); // resetButton now references 
                                    // the HTML button with ID "reset"
@@ -203,7 +243,7 @@ $(document).ready(function() {
 /** 
  * Throws an error message, blinks text red and resets stack
  * @param {string} message - The error message to throw
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object
  */
 function throwError(message, stack, terminal){
@@ -232,20 +272,20 @@ function throwError(message, stack, terminal){
 
 /** 
  * Prints the whole stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function printStack(stack, terminal){
-	print(terminal, " <" + stack.length + "> " + stack.slice().join(" "));
+	print(terminal, " <" + stack.stack_length + "> " + stack.stack_arr.slice().join(" "));
 }
 
 /** 
  * Pops and prints top element of stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function pop(stack, terminal){
-	if(stack.length < 1){
+	if(stack.stack_length < 1){
 		throwError("Not enough elements for pop operation.", stack, terminal);
 		return;
 	}
@@ -255,11 +295,11 @@ function pop(stack, terminal){
 
 /** 
  * Adds the top two elements of the stack together
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function add(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for add operation.", stack, terminal);
 		return;
 	}
@@ -270,11 +310,11 @@ function add(stack, terminal){
 
 /** 
  * Subtracts the top two elements of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function subtract(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for subtract operation.", stack, terminal);
 		return;
 	}
@@ -285,11 +325,11 @@ function subtract(stack, terminal){
 
 /** 
  * Multiplies the top two elements of the stack together
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function multiply(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for multiply operation.", stack, terminal);
 		return;
 	}
@@ -300,11 +340,11 @@ function multiply(stack, terminal){
 
 /** 
  * Divides the top two elements of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function divide(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for divide operation.", stack, terminal);
 		return;
 	}
@@ -314,7 +354,7 @@ function divide(stack, terminal){
 }
 
 function int_divide(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for divide operation.", stack, terminal);
 		return;
 	}
@@ -325,11 +365,11 @@ function int_divide(stack, terminal){
 
 /** 
  * Rounds down the top element of the stack to an integer
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function floor(stack, terminal){
-	if(stack.length < 1){
+	if(stack.stack_length < 1){
 		throwError("Not enough elements for floor operation.", stack, terminal);
 		return;
 	}
@@ -339,11 +379,11 @@ function floor(stack, terminal){
 
 /** 
  * Gets the remainder of the top two elements of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function mod(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for mod operation.", stack, terminal);
 		return;
 	}
@@ -354,11 +394,11 @@ function mod(stack, terminal){
 
 /** 
  * Drops the top element of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function drop(stack, terminal){
-	if(stack.length < 1){
+	if(stack.stack_length < 1){
 		throwError("Not enough elements for drop operation.", stack, terminal);
 		return;
 	}
@@ -367,11 +407,11 @@ function drop(stack, terminal){
 
 /** 
  * Drops the second element of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function nip(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for nip operation.", stack, terminal);
 		return;
 	}
@@ -382,11 +422,11 @@ function nip(stack, terminal){
 
 /** 
  * Swaps the top two elements of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function swap(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for swap operation.", stack, terminal);
 		return;
 	}
@@ -398,11 +438,11 @@ function swap(stack, terminal){
 
 /** 
  * Duplicates the top element of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function dup(stack, terminal){
-	if(stack.length < 1){
+	if(stack.stack_length < 1){
 		throwError("Not enough elements for dup operation.", stack, terminal);
 		return;
 	}
@@ -413,11 +453,11 @@ function dup(stack, terminal){
 
 /** 
  * Copies the top element over the second element
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function over(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for over operation.", stack, terminal);
 		return;
 	}
@@ -430,11 +470,11 @@ function over(stack, terminal){
 
 /** 
  * Copies the second element to the top of the stack
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function tuck(stack, terminal){
-	if(stack.length < 2){
+	if(stack.stack_length < 2){
 		throwError("Not enough elements for tuck operation.", stack, terminal);
 		return;
 	}
@@ -447,7 +487,7 @@ function tuck(stack, terminal){
 
 /** 
  * Clears the console
- * @param {Array[Number]} stack - The stack to work on
+ * @param {Stack} stack - The stack to work on
  * @param {Terminal} terminal - The terminal object in case of error
  */
 function clearStack(stack, terminal){
